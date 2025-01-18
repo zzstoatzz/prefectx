@@ -16,6 +16,7 @@ def main():
         sys.exit(1)
 
     Path(output_file).write_text(code)
+    Variable.unset(variable_name)
     print(f"Successfully wrote code from variable {variable_name} to {output_file}")
 
 if __name__ == "__main__":
