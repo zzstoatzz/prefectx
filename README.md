@@ -1,6 +1,6 @@
 # prefectx
 
-:zap: Deploy code to Prefect Cloud in seconds! :zap:
+:zap: Deploy your code to Prefect Cloud in seconds! :zap:
 
 ## Installation
 All you need is `uv`! See [installation docs here](https://docs.astral.sh/uv/getting-started/installation/)
