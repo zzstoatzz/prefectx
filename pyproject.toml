@@ -22,11 +22,30 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py311"
 line-length = 88
 fix = true
 
-[tool.ruff.isort]
+[tool.ruff.lint]
+select = [
+    "I",    # isort
+    "F",    # pyflakes
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "UP",   # pyupgrade
+    "N",    # naming
+    "B",    # bugbear
+    "A",    # builtins
+    "C4",   # comprehensions
+    "DTZ",  # datetime
+    "T10",  # debugger
+    "ERA",  # eradicate
+    "RET",  # return
+    "SLF",  # self
+    "RUF",  # ruff-specific rules
+]
+
+[tool.ruff.lint.isort]
 known-first-party = ["prefect"]
 combine-as-imports = true
 relative-imports-order = "closest-to-furthest"

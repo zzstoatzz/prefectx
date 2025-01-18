@@ -1,15 +1,23 @@
 import json
-import typer
-from typing_extensions import Annotated
 from pathlib import Path
+
+import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from typing_extensions import Annotated
+
 from prefect.cli.root import PrefectTyper
 from prefect.utilities.urls import url_for
-
 from prefectx.ast_utils import add_flow_decorator
-from prefectx.prefect_utils import store_code_in_variable, ensure_managed_work_pool, create_deployment, get_parameter_schema_from_content, create_flow_run_from_deployment
+from prefectx.prefect_utils import (
+    create_deployment,
+    create_flow_run_from_deployment,
+    ensure_managed_work_pool,
+    get_parameter_schema_from_content,
+    store_code_in_variable,
+)
 
 app = PrefectTyper()
+
 
 @app.command()
 async def main(
@@ -43,10 +51,14 @@ async def main(
         work_pool = await ensure_managed_work_pool()
 
         progress.update(task, description="Deploying flow...")
-        deployment_id = await create_deployment(filename, flow_func, work_pool, variable_name, parameter_schema)
+        deployment_id = await create_deployment(
+            filename, flow_func, work_pool, variable_name, parameter_schema
+        )
 
         progress.update(task, description="Running deployment...")
 
-        flow_run = await create_flow_run_from_deployment(deployment_id, parsed_parameters)
+        flow_run = await create_flow_run_from_deployment(
+            deployment_id, parsed_parameters
+        )
 
     app.console.print(f"View run at: {url_for(flow_run)}", style="blue")
