@@ -1,27 +1,37 @@
 import base64
 import zlib
-from uuid import UUID, uuid4
 from typing import Any
+from uuid import UUID, uuid4
 
 from prefect import get_client
-from prefect.variables import Variable
-from prefect.exceptions import ObjectNotFound
 from prefect.client.schemas.actions import WorkPoolCreate
 from prefect.client.schemas.objects import FlowRun
-from prefect.utilities.callables import ParameterSchema, _generate_signature_from_source, _get_docstring_from_source, generate_parameter_schema, parameter_docstrings
-from prefect.workers.utilities import get_default_base_job_template_for_infrastructure_type
-
+from prefect.exceptions import ObjectNotFound
+from prefect.utilities.callables import (
+    ParameterSchema,
+    _generate_signature_from_source,
+    _get_docstring_from_source,
+    generate_parameter_schema,
+    parameter_docstrings,
+)
+from prefect.variables import Variable
+from prefect.workers.utilities import (
+    get_default_base_job_template_for_infrastructure_type,
+)
 
 PREFECT_MANAGED = "prefect:managed"
 DEFAULT_WORK_POOL_NAME = "managed-work-pool"
 DEFAULT_DEPLOYMENT_NAME = "managed-deployment"
+
 
 async def ensure_managed_work_pool(name: str = DEFAULT_WORK_POOL_NAME) -> str:
     async with get_client() as client:
         try:
             work_pool = await client.read_work_pool(work_pool_name=name)
         except ObjectNotFound:
-            template = await get_default_base_job_template_for_infrastructure_type(PREFECT_MANAGED)
+            template = await get_default_base_job_template_for_infrastructure_type(
+                PREFECT_MANAGED
+            )
             wp = WorkPoolCreate(
                 name=name,
                 type=PREFECT_MANAGED,
@@ -30,6 +40,7 @@ async def ensure_managed_work_pool(name: str = DEFAULT_WORK_POOL_NAME) -> str:
             work_pool = await client.create_work_pool(work_pool=wp, overwrite=True)
 
     return work_pool.name
+
 
 def create_pull_steps(
     variable_name: str,
@@ -42,6 +53,7 @@ def create_pull_steps(
             }
         }
     ]
+
 
 async def create_deployment(
     filename: str,
@@ -63,7 +75,14 @@ async def create_deployment(
         return deployment_id
 
 
-async def create_flow_run_from_deployment(deployment_id: UUID, parameters: dict[str, Any,] | None) -> FlowRun:
+async def create_flow_run_from_deployment(
+    deployment_id: UUID,
+    parameters: dict[
+        str,
+        Any,
+    ]
+    | None,
+) -> FlowRun:
     async with get_client() as client:
         flow_run = await client.create_flow_run_from_deployment(
             deployment_id,
@@ -73,7 +92,9 @@ async def create_flow_run_from_deployment(deployment_id: UUID, parameters: dict[
     return flow_run
 
 
-def get_parameter_schema_from_content(content: str, function_name: str) -> ParameterSchema:
+def get_parameter_schema_from_content(
+    content: str, function_name: str
+) -> ParameterSchema:
     signature = _generate_signature_from_source(content, function_name)
     docstring = _get_docstring_from_source(content, function_name)
     return generate_parameter_schema(signature, parameter_docstrings(docstring))
@@ -88,10 +109,6 @@ async def store_code_in_variable(
     compressed = zlib.compress(contents.encode())
     encoded = base64.b64encode(compressed).decode()
 
-    await Variable.aset(
-        name=variable_name,
-        value=encoded,
-        overwrite=True
-    )
+    await Variable.aset(name=variable_name, value=encoded, overwrite=True)
 
     return variable_name

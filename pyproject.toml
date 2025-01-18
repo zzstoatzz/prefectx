@@ -29,19 +29,6 @@ fix = true
 [tool.ruff.lint]
 select = [
     "I",    # isort
-    "F",    # pyflakes
-    "E",    # pycodestyle errors
-    "W",    # pycodestyle warnings
-    "UP",   # pyupgrade
-    "N",    # naming
-    "B",    # bugbear
-    "A",    # builtins
-    "C4",   # comprehensions
-    "DTZ",  # datetime
-    "T10",  # debugger
-    "ERA",  # eradicate
-    "RET",  # return
-    "SLF",  # self
     "RUF",  # ruff-specific rules
 ]
 

@@ -1,8 +1,10 @@
+import base64
 import sys
 import zlib
-import base64
 from pathlib import Path
+
 from prefect.variables import Variable
+
 
 def main():
     if len(sys.argv) != 3:
@@ -23,6 +25,7 @@ def main():
     Path(output_file).write_text(code)
     Variable.unset(variable_name)
     print(f"Successfully wrote code from variable {variable_name} to {output_file}")
+
 
 if __name__ == "__main__":
     main()
