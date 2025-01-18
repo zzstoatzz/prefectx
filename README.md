@@ -1,29 +1,44 @@
 # prefectx
 
-:zap: Deploy your workflow to Prefect Cloud in seconds! :zap:
+:zap: Deploy code to Prefect Cloud in seconds! :zap:
 
 ### Make sure `uv` is [installed](https://docs.astral.sh/uv/getting-started/installation/)
-```
+```bash
 $ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 ### Login to Prefect Cloud
-```
+```bash
 $ uvx prefect cloud login
 ```
 
 ### Create an example workflow
-```
+Create a Python file with the function(s) you want to deploy. The function you specify will be automatically converted into a Prefect flow.
+
+```python
 $ cat << 'EOF' > hello_workflow.py
 def get_message():
     return "Hello, World!"
 
 def hello_world():
     print(get_message())
+
+def greet_user(name: str, exclaim: bool = False):
+    message = f"Hello, {name}"
+    if exclaim:
+        message += "!"
+    print(message)
 EOF
 ```
 
-### Run your workflow on Prefect Cloud
-```
+### Deploy your code on Prefect Cloud
+
+Specify the file and the function you want to run:
+```bash
 $ uvx --from git+https://github.com/jakekaplan/prefectx@main prefectx hello_workflow.py hello_world
+```
+
+Run with parameters:
+```bash
+$ uvx --from git+https://github.com/jakekaplan/prefectx@main prefectx hello_workflow.py greet_user --parameters '{"name": "Alice", "exclaim": true}'
 ```
