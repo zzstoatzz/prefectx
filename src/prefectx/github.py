@@ -10,7 +10,8 @@ def get_github_token() -> str:
     try:
         token = subprocess.check_output(
             ["gh", "auth", "token"],
-            text=True
+            text=True,
+            stderr=subprocess.DEVNULL  # Suppress stderr output
         ).strip()
         if token:
             return token
@@ -23,6 +24,7 @@ def get_github_token() -> str:
             ["git", "credential", "fill"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,  # Suppress stderr output
             text=True
         )
         output, _ = proc.communicate("url=https://github.com\n\n")
