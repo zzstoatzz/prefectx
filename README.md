@@ -1,5 +1,7 @@
 # prefectx
 
+Launch your workflow on prefect in seconds!
+
 ### Make sure `uv` is [installed](https://docs.astral.sh/uv/getting-started/installation/)
 ```
 $ curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -23,5 +25,5 @@ EOF
 
 ### Run your workflow on Prefect Cloud
 ```
-$ uvx --from git+https://github.com/jakekaplan/prefectx@main prefectx hello_workflow.py hello
+$ uvx --from git+https://github.com/jakekaplan/prefectx@main prefectx hello_workflow.py hello_world
 ```
