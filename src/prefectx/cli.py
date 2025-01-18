@@ -21,6 +21,7 @@ async def main(filename: str, flow_func: str):
         contents_as_flow = add_flow_decorator(raw_contents, flow_func)
         parameter_schema = get_parameter_schema_from_content(raw_contents, flow_func)
 
+        progress.update(task, description="Uploading code to temporary storage...")
         variable_name = await store_code_in_variable(contents_as_flow)
 
         progress.update(task, description="Creating work pool...")
