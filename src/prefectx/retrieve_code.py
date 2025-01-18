@@ -1,4 +1,6 @@
 import sys
+import zlib
+import base64
 from pathlib import Path
 from prefect.variables import Variable
 
@@ -10,10 +12,13 @@ def main():
     variable_name = sys.argv[1]
     output_file = sys.argv[2]
 
-    code = Variable.get(variable_name)
-    if not code:
+    encoded = Variable.get(variable_name)
+    if not encoded:
         print(f"No code found in variable {variable_name}")
         sys.exit(1)
+
+    compressed = base64.b64decode(encoded)
+    code = zlib.decompress(compressed).decode()
 
     Path(output_file).write_text(code)
     Variable.unset(variable_name)

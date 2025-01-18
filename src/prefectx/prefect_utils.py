@@ -1,3 +1,5 @@
+import base64
+import zlib
 from uuid import UUID, uuid4
 from typing import Any
 
@@ -82,9 +84,13 @@ async def store_code_in_variable(
 ) -> str:
     variable_name = unique_name("code").replace("-", "_")
 
+    # Compress and encode the contents
+    compressed = zlib.compress(contents.encode())
+    encoded = base64.b64encode(compressed).decode()
+
     await Variable.aset(
         name=variable_name,
-        value=contents,
+        value=encoded,
         overwrite=True
     )
 

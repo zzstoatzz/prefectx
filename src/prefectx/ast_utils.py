@@ -1,8 +1,6 @@
 import ast
 from typing import Any
 
-from prefect.utilities.callables import parameter_schema
-
 class FlowDecorator(ast.NodeTransformer):
     def __init__(self, target_name: str):
         self.modified = False
@@ -22,7 +20,6 @@ class FlowDecorator(ast.NodeTransformer):
 
 def add_flow_decorator(content: str, function_name: str) -> str:
     """Adds @flow decorator to specified function and returns modified content."""
-    # Parse the content
     tree = ast.parse(content)
 
     # Add import if it doesn't exist
@@ -41,11 +38,9 @@ def add_flow_decorator(content: str, function_name: str) -> str:
         )
         tree.body.insert(0, import_flow)
 
-    # Add decorator to specified function
     transformer = FlowDecorator(function_name)
     modified_tree = transformer.visit(tree)
 
-    # Return modified content
     return ast.unparse(modified_tree)
 
 
