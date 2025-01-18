@@ -1,3 +1,6 @@
+import json
+import typer
+from typing_extensions import Annotated
 from pathlib import Path
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from prefect.cli.root import PrefectTyper
@@ -9,7 +12,19 @@ from prefectx.prefect_utils import store_code_in_variable, ensure_managed_work_p
 app = PrefectTyper()
 
 @app.command()
-async def main(filename: str, flow_func: str):
+async def main(
+    filename: str,
+    flow_func: str,
+    parameters: Annotated[str, typer.Option()] = None,
+):
+    parsed_parameters = {}
+    if parameters:
+        try:
+            parsed_parameters = json.loads(parameters)
+        except json.JSONDecodeError:
+            app.console.print("Error: Parameters must be valid JSON", style="red")
+            return
+
     with Progress(
         SpinnerColumn(),
         TextColumn("[blue]{task.description}"),
@@ -32,6 +47,6 @@ async def main(filename: str, flow_func: str):
 
         progress.update(task, description="Running deployment...")
 
-        flow_run = await create_flow_run_from_deployment(deployment_id)
+        flow_run = await create_flow_run_from_deployment(deployment_id, parsed_parameters)
 
     app.console.print(f"View run at: {url_for(flow_run)}", style="blue")

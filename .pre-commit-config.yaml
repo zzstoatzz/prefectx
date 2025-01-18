@@ -1,0 +1,13 @@
+repos:
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.9.2
+  hooks:
+    - id: ruff
+      args: [
+        --fix,
+        --select=I,F,E,W,UP,N,B,A,C4,DTZ,T10,ERA,RET,SLF,RUF,
+        --unfixable=F841,
+      ]
+      types_or: [python, pyi]
+    - id: ruff-format
+      types_or: [python, pyi]

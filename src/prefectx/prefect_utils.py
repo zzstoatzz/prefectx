@@ -11,7 +11,6 @@ from prefect.client.schemas.objects import FlowRun
 from prefect.utilities.callables import ParameterSchema, _generate_signature_from_source, _get_docstring_from_source, generate_parameter_schema, parameter_docstrings
 from prefect.workers.utilities import get_default_base_job_template_for_infrastructure_type
 
-from prefectx.utils import unique_name
 
 PREFECT_MANAGED = "prefect:managed"
 DEFAULT_WORK_POOL_NAME = "managed-work-pool"
@@ -49,7 +48,7 @@ async def create_deployment(
     flow_func: str,
     work_pool_name: str,
     variable_name: str,
-    parameter_schema: ParameterSchema
+    parameter_schema: ParameterSchema,
 ):
     async with get_client() as client:
         flow_id = await client.create_flow_from_name(flow_func)
@@ -64,10 +63,11 @@ async def create_deployment(
         return deployment_id
 
 
-async def create_flow_run_from_deployment(deployment_id: UUID) -> FlowRun:
+async def create_flow_run_from_deployment(deployment_id: UUID, parameters: dict[str, Any,] | None) -> FlowRun:
     async with get_client() as client:
         flow_run = await client.create_flow_run_from_deployment(
             deployment_id,
+            parameters=parameters,
         )
 
     return flow_run
@@ -82,7 +82,7 @@ def get_parameter_schema_from_content(content: str, function_name: str) -> Param
 async def store_code_in_variable(
     contents: str,
 ) -> str:
-    variable_name = unique_name("code").replace("-", "_")
+    variable_name = f"tmp_code_{uuid4().hex[:8]}"
 
     # Compress and encode the contents
     compressed = zlib.compress(contents.encode())
