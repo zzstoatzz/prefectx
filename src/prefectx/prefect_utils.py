@@ -36,7 +36,7 @@ def create_pull_steps(
     return [
         {
             "prefect.deployments.steps.run_shell_script": {
-                "script": f"uv run https://raw.githubusercontent.com/jakekaplan/prefectx/refs/heads/main/src/prefectx/retrieve_variable.py {variable_name} {filename}"
+                "script": f"uv run https://raw.githubusercontent.com/jakekaplan/prefectx/refs/heads/main/src/prefectx/retrieve_code.py {variable_name} {filename}"
             }
         }
     ]
