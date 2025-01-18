@@ -1,6 +1,6 @@
 # prefectx
 
-Launch your workflow on prefect in seconds!
+:zap: Deploy your workflow to Prefect Cloud in seconds! :zap:
 
 ### Make sure `uv` is [installed](https://docs.astral.sh/uv/getting-started/installation/)
 ```
