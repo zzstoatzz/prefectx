@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 from httpx import AsyncClient
 
+
 def get_github_token() -> str:
     """Get GitHub token from various local sources."""
     # Try getting from gh cli first
@@ -11,17 +12,20 @@ def get_github_token() -> str:
             ["gh", "auth", "token"],
             text=True
         ).strip()
-        return token
+        if token:
+            return token
     except (subprocess.SubprocessError, FileNotFoundError):
         pass
 
     # Try getting from git credential helper
     try:
-        output = subprocess.check_output(
+        proc = subprocess.Popen(
             ["git", "credential", "fill"],
-            input=b"url=https://github.com\n\n",
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
             text=True
         )
+        output, _ = proc.communicate("url=https://github.com\n\n")
         for line in output.splitlines():
             if line.startswith("password="):
                 return line.split("=", 1)[1]
@@ -36,13 +40,16 @@ def get_github_token() -> str:
             for line in creds.splitlines():
                 if "https://" in line:
                     token = line.split(":")[-1].split("@")[0]
-                    return token
+                    if token:
+                        return token
     except Exception:
         pass
 
     raise RuntimeError(
-        "Could not find GitHub token. Please ensure you're logged in via 'gh auth login' "
-        "or have credentials stored in git config"
+        "Could not find GitHub token. Please ensure you:\n"
+        "1. Are logged in via 'gh auth login'\n"
+        "2. Or have credentials stored in git config\n"
+        "3. Or have a token in ~/.git-credentials"
     )
 
 async def create_github_repo(repo_name: str | None = None) -> str:
