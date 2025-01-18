@@ -20,6 +20,7 @@ def hello_world():
     print(get_message())
 EOF
 ```
+
 ### Run your workflow on Prefect Cloud
 ```
 $ uvx --from git+https://github.com/jakekaplan/prefectx@main prefectx hello_workflow.py hello
