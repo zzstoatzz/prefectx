@@ -1,7 +1,8 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 from typing import Any
 
 from prefect import get_client
+from prefect.variables import Variable
 from prefect.exceptions import ObjectNotFound
 from prefect.client.schemas.actions import WorkPoolCreate
 from prefect.client.schemas.objects import FlowRun
@@ -28,22 +29,23 @@ async def ensure_managed_work_pool(name: str = DEFAULT_WORK_POOL_NAME) -> str:
 
     return work_pool.name
 
-def create_pull_step(
-    repo: str,
-    branch: str = "main"
-) -> dict[str, Any]:
-    return {
-        "prefect.deployments.steps.git_clone": {
-            "branch": branch,
-            "repository": repo
+def create_pull_steps(
+    variable_name: str,
+    filename: str,
+) -> list[dict[str, Any]]:
+    return [
+        {
+            "prefect.deployments.steps.run_shell_script": {
+                "script": f"uv run https://raw.githubusercontent.com/jakekaplan/prefectx/refs/heads/main/src/prefectx/retrieve_variable.py {variable_name} {filename}"
+            }
         }
-    }
+    ]
 
 async def create_deployment(
     filename: str,
     flow_func: str,
     work_pool_name: str,
-    repo: str,
+    variable_name: str,
     parameter_schema: ParameterSchema
 ):
     async with get_client() as client:
@@ -53,7 +55,7 @@ async def create_deployment(
             entrypoint=f"{filename}:{flow_func}",
             name=unique_name("deployment"),
             work_pool_name=work_pool_name,
-            pull_steps=[create_pull_step(repo)],
+            pull_steps=create_pull_steps(variable_name, filename),
             parameter_openapi_schema=parameter_schema.model_dump_for_openapi(),
         )
         return deployment_id
@@ -72,3 +74,17 @@ def get_parameter_schema_from_content(content: str, function_name: str) -> Param
     signature = _generate_signature_from_source(content, function_name)
     docstring = _get_docstring_from_source(content, function_name)
     return generate_parameter_schema(signature, parameter_docstrings(docstring))
+
+
+async def store_code_in_variable(
+    contents: str,
+) -> str:
+    variable_name = f"code-{uuid4().hex[:8]}"
+
+    await Variable.aset(
+        name=variable_name,
+        value=contents,
+        overwrite=True
+    )
+
+    return variable_name
