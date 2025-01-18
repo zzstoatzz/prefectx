@@ -79,7 +79,7 @@ def get_parameter_schema_from_content(content: str, function_name: str) -> Param
 async def store_code_in_variable(
     contents: str,
 ) -> str:
-    variable_name = f"code-{uuid4().hex[:8]}"
+    variable_name = unique_name("code").replace("-", "_")
 
     await Variable.aset(
         name=variable_name,
