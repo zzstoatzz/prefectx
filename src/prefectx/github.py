@@ -1,19 +1,59 @@
 import base64
-import uuid
+import subprocess
 from pathlib import Path
-
 from httpx import AsyncClient
 
-from prefectx.settings import settings
-from prefectx.utils import unique_name
+def get_github_token() -> str:
+    """Get GitHub token from various local sources."""
+    # Try getting from gh cli first
+    try:
+        token = subprocess.check_output(
+            ["gh", "auth", "token"],
+            text=True
+        ).strip()
+        return token
+    except (subprocess.SubprocessError, FileNotFoundError):
+        pass
+
+    # Try getting from git credential helper
+    try:
+        output = subprocess.check_output(
+            ["git", "credential", "fill"],
+            input=b"url=https://github.com\n\n",
+            text=True
+        )
+        for line in output.splitlines():
+            if line.startswith("password="):
+                return line.split("=", 1)[1]
+    except subprocess.SubprocessError:
+        pass
+
+    # Try reading from ~/.git-credentials
+    try:
+        cred_path = Path.home() / ".git-credentials"
+        if cred_path.exists():
+            creds = cred_path.read_text()
+            for line in creds.splitlines():
+                if "https://" in line:
+                    token = line.split(":")[-1].split("@")[0]
+                    return token
+    except Exception:
+        pass
+
+    raise RuntimeError(
+        "Could not find GitHub token. Please ensure you're logged in via 'gh auth login' "
+        "or have credentials stored in git config"
+    )
 
 async def create_github_repo(repo_name: str | None = None) -> str:
     """Creates a public GitHub repo using GitHub's API."""
     if repo_name is None:
-        repo_name = unique_name("temp-repo")
+        # You might want to implement unique_name() separately
+        from uuid import uuid4
+        repo_name = f"temp-repo-{uuid4().hex[:8]}"
 
     headers = {
-        "Authorization": f"token {settings.github_token}"
+        "Authorization": f"token {get_github_token()}"
     }
 
     data = {
@@ -30,18 +70,15 @@ async def create_github_repo(repo_name: str | None = None) -> str:
 
     return response.json()["clone_url"]
 
-
 async def upload_file_to_repo(repo_name: str, filename: str, contents: str, branch: str = "main") -> None:
     """Uploads a file directly to GitHub using the Contents API."""
-    # Clean repo name - remove .git and any URL parts
     repo_name = repo_name.replace("https://github.com/", "").replace(".git", "")
 
-    # Encode contents
     content_bytes = contents.encode('utf-8')
     content_b64 = base64.b64encode(content_bytes).decode('utf-8')
 
     headers = {
-        "Authorization": f"token {settings.github_token}"
+        "Authorization": f"token {get_github_token()}"
     }
 
     data = {
