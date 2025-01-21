@@ -21,7 +21,6 @@ from prefect.workers.utilities import (
 
 PREFECT_MANAGED = "prefect:managed"
 DEFAULT_WORK_POOL_NAME = "managed-work-pool"
-DEFAULT_DEPLOYMENT_NAME = "managed-deployment"
 
 
 async def ensure_managed_work_pool(name: str = DEFAULT_WORK_POOL_NAME) -> str:
@@ -67,7 +66,7 @@ async def create_deployment(
         deployment_id = await client.create_deployment(
             flow_id=flow_id,
             entrypoint=f"{filename}:{flow_func}",
-            name=DEFAULT_DEPLOYMENT_NAME,
+            name=f"{flow_func}-deployment",
             work_pool_name=work_pool_name,
             pull_steps=create_pull_steps(variable_name, filename),
             parameter_openapi_schema=parameter_schema.model_dump_for_openapi(),
