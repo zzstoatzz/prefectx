@@ -34,7 +34,7 @@ async def ensure_managed_work_pool(name: str = DEFAULT_WORK_POOL_NAME) -> str:
             wp = WorkPoolCreate(
                 name=name,
                 type=PREFECT_MANAGED,
-                base_job_template=template,
+                base_job_template=template or {},
             )
             work_pool = await client.create_work_pool(work_pool=wp, overwrite=True)
 
