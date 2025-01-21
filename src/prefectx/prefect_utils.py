@@ -66,7 +66,7 @@ async def create_deployment(
         deployment_id = await client.create_deployment(
             flow_id=flow_id,
             entrypoint=f"{filename}:{flow_func}",
-            name=f"{flow_func}-deployment",
+            name=f"{flow_func}_deployment",
             work_pool_name=work_pool_name,
             pull_steps=create_pull_steps(variable_name, filename),
             parameter_openapi_schema=parameter_schema.model_dump_for_openapi(),
