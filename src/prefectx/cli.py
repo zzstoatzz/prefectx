@@ -61,4 +61,4 @@ async def main(
             deployment_id, parsed_parameters
         )
 
-    app.console.print(f"View run at: {url_for(flow_run)}", style="blue")
+    app.console.print(f"View run: {url_for(flow_run)}", style="blue", no_wrap=True)
